@@ -11,5 +11,11 @@
     "title": "概览",
     "analytics": "分析页",
     "workspace": "工作台"
+  },
+  "ecommerce": {
+    "title": "电商管理",
+    "product": "商品管理",
+    "category": "分类管理",
+    "order": "订单管理"
   }
 }

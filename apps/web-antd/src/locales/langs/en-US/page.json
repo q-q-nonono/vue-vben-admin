@@ -11,5 +11,11 @@
     "title": "Dashboard",
     "analytics": "Analytics",
     "workspace": "Workspace"
+  },
+  "ecommerce": {
+    "title": "E-Commerce",
+    "product": "Product Management",
+    "category": "Category Management",
+    "order": "Order Management"
   }
 }
