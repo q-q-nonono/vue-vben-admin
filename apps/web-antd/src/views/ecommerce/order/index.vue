@@ -5,8 +5,8 @@ import { Page } from '@vben/common-ui';
 
 import { Button, message, Modal, Tag } from 'ant-design-vue';
 
-import { getOrderListApi, updateOrderStatusApi } from '#/api/ecommerce/order';
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
+import { getOrderListApi, updateOrderStatusApi } from '#/api/ecommerce/order';
 
 const router = useRouter();
 
@@ -140,10 +140,18 @@ const [Grid, gridApi] = useVbenVxeGrid({
  */
 function getStatusActions(
   status: string,
-): { label: string; nextStatus: string; type?: 'primary' | 'danger' | 'default' | 'link' }[] {
+): {
+  label: string;
+  nextStatus: string;
+  type?: 'danger' | 'default' | 'link' | 'primary';
+}[] {
   const actions: Record<
     string,
-    { label: string; nextStatus: string; type?: string }[]
+    {
+      label: string;
+      nextStatus: string;
+      type?: 'danger' | 'default' | 'link' | 'primary';
+    }[]
   > = {
     待付款: [
       { label: '确认付款', nextStatus: '待发货', type: 'primary' },
