@@ -1,0 +1,33 @@
+import { faker } from '@faker-js/faker';
+import { eventHandler, readBody } from 'h3';
+import { verifyAccessToken } from '~/utils/jwt-utils';
+import { unAuthorizedResponse, useResponseSuccess } from '~/utils/response';
+import { productList } from '~/utils/product-mock-data';
+
+export default eventHandler(async (event) => {
+  const userinfo = verifyAccessToken(event);
+  if (!userinfo) {
+    return unAuthorizedResponse(event);
+  }
+
+  const body = await readBody(event);
+
+  // 知识点：将新增的商品添加到共享的 productList 数组中
+  // 这样列表接口也能查到这条数据
+  const newProduct = {
+    id: faker.string.uuid(),
+    name: body.name,
+    category: body.category,
+    price: body.price,
+    stock: body.stock,
+    status: body.status || '上架',
+    image: faker.image.url(),
+    description: body.description || '',
+    createTime: new Date().toISOString().split('T')[0],
+  };
+
+  // 插入到数组最前面，新增的排在前面
+  productList.unshift(newProduct);
+
+  return useResponseSuccess(newProduct);
+});

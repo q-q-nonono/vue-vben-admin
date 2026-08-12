@@ -1,0 +1,20 @@
+import { eventHandler, getQuery } from 'h3';
+import { verifyAccessToken } from '~/utils/jwt-utils';
+import { unAuthorizedResponse, useResponseSuccess } from '~/utils/response';
+import { productList } from '~/utils/product-mock-data';
+
+export default eventHandler(async (event) => {
+  const userinfo = verifyAccessToken(event);
+  if (!userinfo) {
+    return unAuthorizedResponse(event);
+  }
+
+  const { id } = getQuery(event);
+  const product = productList.find((item) => item.id === id);
+
+  if (!product) {
+    return useResponseSuccess(null);
+  }
+
+  return useResponseSuccess(product);
+});

@@ -6,8 +6,9 @@ import { Page } from '@vben/common-ui';
 import { Button, message, Modal, Tag } from 'ant-design-vue';
 
 import { getOrderListApi, updateOrderStatusApi } from '#/api/ecommerce/order';
-const router = useRouter();
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
+
+const router = useRouter();
 
 // 知识点：状态对应的颜色标签
 // 待付款 → orange / 待发货 → blue / 已发货 → cyan / 已完成 → green / 已取消 → red
@@ -139,7 +140,7 @@ const [Grid, gridApi] = useVbenVxeGrid({
  */
 function getStatusActions(
   status: string,
-): { label: string; nextStatus: string; type?: string }[] {
+): { label: string; nextStatus: string; type?: 'primary' | 'danger' | 'default' | 'link' }[] {
   const actions: Record<
     string,
     { label: string; nextStatus: string; type?: string }[]
@@ -220,7 +221,7 @@ async function handleUpdateStatus(row: any, nextStatus: string) {
           :key="action.nextStatus"
         >
           <Button
-            :type="action.type || 'link'"
+            :type="(action.type || 'link') as any"
             size="small"
             :danger="action.type === 'danger'"
             @click="handleUpdateStatus(row, action.nextStatus)"

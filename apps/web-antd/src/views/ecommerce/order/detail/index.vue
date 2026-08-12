@@ -22,7 +22,6 @@ const router = useRouter();
 
 const orderId = route.params.orderId as string;
 const order = ref<any>(null);
-const loading = ref(false);
 
 const statusColorMap: Record<string, string> = {
   待付款: 'orange',
@@ -75,7 +74,7 @@ async function handleUpdateStatus(nextStatus: string) {
 
 function getStatusActions(
   status: string,
-): { label: string; nextStatus: string; type?: string }[] {
+): { label: string; nextStatus: string; type?: 'primary' | 'danger' | 'default' | 'link' }[] {
   const actions: Record<
     string,
     { label: string; nextStatus: string; type?: string }[]
@@ -119,7 +118,7 @@ const statusTimeline: Record<string, { color: string; label: string }> = {
           :key="action.nextStatus"
         >
           <Button
-            :type="action.type || 'default'"
+            :type="(action.type || 'default') as any"
             :danger="action.type === 'danger'"
             @click="handleUpdateStatus(action.nextStatus)"
           >

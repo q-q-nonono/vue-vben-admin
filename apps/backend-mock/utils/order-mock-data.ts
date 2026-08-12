@@ -1,5 +1,4 @@
 import { faker } from '@faker-js/faker';
-
 /** 订单状态 */
 export const ORDER_STATUSES = [
   '待付款',
