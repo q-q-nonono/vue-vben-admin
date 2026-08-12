@@ -7,7 +7,7 @@
   "license": "MIT",
   "author": "",
   "scripts": {
-    "build": "nitro build",
+    "build": "nitro build && node scripts/postbuild.mjs",
     "start": "nitro dev"
   },
   "dependencies": {
