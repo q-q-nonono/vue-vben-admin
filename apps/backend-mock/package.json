@@ -3,6 +3,7 @@
   "version": "5.7.0",
   "description": "",
   "private": true,
+  "type": "module",
   "license": "MIT",
   "author": "",
   "scripts": {
