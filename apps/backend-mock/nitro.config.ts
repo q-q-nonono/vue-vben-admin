@@ -6,6 +6,7 @@ process.env.COMPATIBILITY_DATE = new Date().toISOString();
 export default defineNitroConfig({
   devErrorHandler: errorHandler,
   errorHandler: '~/error',
+  preset: 'vercel',
   routeRules: {
     '/api/**': {
       cors: true,
