@@ -1,5 +1,3 @@
 {
-  "rootDirectory": "apps/web-antd",
-  "outputDirectory": "dist",
-  "buildCommand": "pnpm build"
+  "outputDirectory": "apps/web-antd/dist"
 }
