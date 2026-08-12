@@ -1,0 +1,5 @@
+{
+  "buildCommand": "pnpm install && pnpm --filter @vben/web-antd build",
+  "outputDirectory": "apps/web-antd/dist",
+  "framework": "vite"
+}
