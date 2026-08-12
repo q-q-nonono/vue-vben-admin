@@ -11,14 +11,13 @@ const functionsDir = join(outputDir, 'functions');
 const configPath = join(outputDir, 'config.json');
 const config = JSON.parse(await readFile(configPath, 'utf8'));
 config.routes = config.routes.filter(
-  (r) =>
-    r.headers || r.handle || r.dest === '/__fallback' || r.dest === '/[...]',
+  (r) => r.headers || r.handle || r.dest === '/__fallback',
 );
 await writeFile(configPath, JSON.stringify(config, null, 2));
 process.stderr.write('[postbuild] config.json routes cleaned\n');
 
 // 2. 删除 api/ 下所有独立 .func 文件/目录（只保留 __fallback.func）
-async function removeFuncs(dirPath) {
+async function removeFuncs(dirPath, isRoot = false) {
   let entries;
   try {
     entries = await readdir(dirPath);
@@ -28,6 +27,9 @@ async function removeFuncs(dirPath) {
   for (const entry of entries) {
     const fullPath = join(dirPath, entry);
     const stat = await lstat(fullPath);
+    if (isRoot && entry === '__fallback.func') {
+      continue; // 保留根目录的 __fallback.func
+    }
     if (stat.isDirectory() && entry.endsWith('.func')) {
       await rm(fullPath, { recursive: true, force: true });
       process.stderr.write(`[postbuild] removed ${fullPath}\n`);
@@ -35,11 +37,11 @@ async function removeFuncs(dirPath) {
       await rm(fullPath, { force: true });
       process.stderr.write(`[postbuild] removed symlink ${fullPath}\n`);
     } else if (stat.isDirectory()) {
-      await removeFuncs(fullPath);
+      await removeFuncs(fullPath, false);
     }
   }
 }
-await removeFuncs(functionsDir);
+await removeFuncs(functionsDir, true);
 
 process.stderr.write(
   '[postbuild] done - all individual .func entries removed, only __fallback remains\n',

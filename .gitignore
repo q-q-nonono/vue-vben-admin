@@ -24,6 +24,9 @@ package-lock.json
 **/backend-mock/data
 .omx
 .pnpm-store
+# Vercel build output
+.vercel/output
+
 # local env files
 .env.local
 .env.*.local
