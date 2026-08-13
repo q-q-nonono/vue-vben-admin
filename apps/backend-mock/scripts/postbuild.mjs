@@ -1,74 +1,40 @@
-// 构建后处理：清理临时构建产物，只保留 __fallback.func，再转移到 .vercel/output/
-// 先构建到临时目录避免 Vercel 在构建过程中就扫描到多余的 .func 文件
-import {
-  lstat,
-  readdir,
-  readFile,
-  rename,
-  rm,
-  writeFile,
-} from 'node:fs/promises';
+// 构建后处理：从 /tmp/ 临时构建产物复制必要的文件到 .vercel/output/
+// 构建在 /tmp/ 中进行，Vercel 监视器无法看到临时目录里的 35+ .func symlink
+
+import { cp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const dir = dirname(fileURLToPath(import.meta.url));
-const tempOutputDir = join(dir, '..', '.nitro-vercel-output');
-const finalOutputDir = join(dir, '..', '.vercel', 'output');
-const functionsDir = join(tempOutputDir, 'functions');
+const projectRoot = join(dir, '..');
 
-// 1. 清理 config.json：只保留 header 规则、静态文件处理和 fallback 通配路由
-const configPath = join(tempOutputDir, 'config.json');
-const config = JSON.parse(await readFile(configPath, 'utf8'));
+const tmpOutputDir = '/tmp/vben-nitro-output';
+const vercelOutputDir = join(projectRoot, '.vercel', 'output');
+const funcDir = join(vercelOutputDir, 'functions', '__fallback.func');
+
+// 1. 删除旧的 .vercel/output，重建目录结构
+await rm(vercelOutputDir, { recursive: true, force: true });
+await mkdir(funcDir, { recursive: true });
+
+// 2. 复制 __fallback.func 的内容（这是唯一的 Serverless Function）
+const srcFuncDir = join(tmpOutputDir, 'functions', '__fallback.func');
+await cp(srcFuncDir, funcDir, { recursive: true });
+
+// 3. 从 /tmp/config.json 复制并过滤 routes
+const tmpConfigPath = join(tmpOutputDir, 'config.json');
+const config = JSON.parse(await readFile(tmpConfigPath, 'utf8'));
+// 只保留 headers 规则、filesystem handle、和 __fallback 通配路由
 config.routes = config.routes.filter(
   (r) => r.headers || r.handle || r.dest === '/__fallback',
 );
-await writeFile(configPath, JSON.stringify(config, null, 2));
-process.stderr.write('[postbuild] config.json routes cleaned\n');
+await writeFile(
+  join(vercelOutputDir, 'config.json'),
+  JSON.stringify(config, null, 2),
+);
 
-// 2. 删除所有独立的 .func 文件/目录（只保留 __fallback.func）
-async function removeFuncs(dirPath, isRoot = false) {
-  let entries;
-  try {
-    entries = await readdir(dirPath);
-  } catch {
-    return;
-  }
-  for (const entry of entries) {
-    const fullPath = join(dirPath, entry);
-    const stat = await lstat(fullPath);
-    if (isRoot && entry === '__fallback.func') {
-      continue; // 保留根目录的 __fallback.func
-    }
-    if (stat.isDirectory() && entry.endsWith('.func')) {
-      await rm(fullPath, { recursive: true, force: true });
-      process.stderr.write(`[postbuild] removed ${fullPath}\n`);
-    } else if (stat.isSymbolicLink() && entry.endsWith('.func')) {
-      await rm(fullPath, { force: true });
-      process.stderr.write(`[postbuild] removed symlink ${fullPath}\n`);
-    } else if (stat.isDirectory()) {
-      await removeFuncs(fullPath, false);
-    }
-  }
-}
-await removeFuncs(functionsDir, true);
-
-// 3. 删除整个 api/ 目录树（里面只剩下空目录和已删除的 symlink）
-const apiDir = join(functionsDir, 'api');
-try {
-  await rm(apiDir, { recursive: true, force: true });
-  process.stderr.write('[postbuild] removed api/ directory tree\n');
-} catch {
-  // 可能不存在，忽略
-}
-
-// 4. 转移到 .vercel/output/（替换已存在的）
-try {
-  await rm(finalOutputDir, { recursive: true, force: true });
-} catch {
-  // 可能不存在，忽略
-}
-await rename(tempOutputDir, finalOutputDir);
+// 4. 清理临时目录
+await rm(tmpOutputDir, { recursive: true, force: true });
 
 process.stderr.write(
-  '[postbuild] done - cleaned output moved to .vercel/output/\n',
+  '[postbuild] done - /tmp outputs cleaned, .vercel/output/ built with 1 function\n',
 );

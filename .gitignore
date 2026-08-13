@@ -26,7 +26,6 @@ package-lock.json
 .pnpm-store
 # Vercel build output
 .vercel/output
-.nitro-vercel-output
 
 # local env files
 .env.local

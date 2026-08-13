@@ -8,7 +8,7 @@ export default defineNitroConfig({
   errorHandler: '~/error',
   preset: 'vercel',
   output: {
-    dir: '.nitro-vercel-output',
+    dir: '/tmp/vben-nitro-output',
   },
   routeRules: {
     '/api/**': {
