@@ -7,6 +7,9 @@ export default defineNitroConfig({
   devErrorHandler: errorHandler,
   errorHandler: '~/error',
   preset: 'vercel',
+  output: {
+    dir: '.nitro-vercel-output',
+  },
   routeRules: {
     '/api/**': {
       cors: true,
