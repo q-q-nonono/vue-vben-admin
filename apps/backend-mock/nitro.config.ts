@@ -7,6 +7,7 @@ export default defineNitroConfig({
   devErrorHandler: errorHandler,
   errorHandler: '~/error',
   preset: 'vercel',
+  inlineDynamicImports: true,
   output: {
     dir: '/tmp/vben-nitro-output',
   },
